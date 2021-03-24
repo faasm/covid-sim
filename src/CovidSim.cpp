@@ -154,7 +154,11 @@ int main(int argc, char* argv[])
 		parse_read_file(input.substr(sep + 1), snapshot_save_file);
 	};
 
+#ifdef _OPENMP
+	double cl = omp_get_wtime();
+#else
 	double cl = (double) clock();
+#endif
 
 	// Default bitmap format is platform dependent.
 #if defined(IMAGE_MAGICK) || defined(_WIN32)
@@ -298,7 +302,11 @@ int main(int argc, char* argv[])
 	for (auto const& int_file : InterventionFiles)
 		ReadInterventions(int_file);
 
+#ifdef _OPENMP
+	Files::xfprintf_stderr("Model setup in %lf seconds\n", (omp_get_wtime() - cl));
+#else
 	Files::xfprintf_stderr("Model setup in %lf seconds\n", ((double) clock() - cl) / CLOCKS_PER_SEC);
+#endif
 
 
 	//// **** //// **** //// **** //// **** //// **** //// **** //// **** //// **** //// **** //// **** //// **** //// **** //// **** //// ****
@@ -417,7 +425,11 @@ int main(int argc, char* argv[])
 			Bitmap_Finalise();
 
 			Files::xfprintf_stderr("Extinction in %i out of %i runs\n", P.NRactE, P.NRactNE + P.NRactE);
+#ifdef _OPENMP
+			Files::xfprintf_stderr("Model ran in %lf seconds\n", (omp_get_wtime() - cl));
+#else
 			Files::xfprintf_stderr("Model ran in %lf seconds\n", ((double)clock() - cl) / CLOCKS_PER_SEC);
+#endif
 			Files::xfprintf_stderr("Model finished\n");
 		}
 	}
