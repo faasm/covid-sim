@@ -18,9 +18,17 @@ add_subdirectory(Geometry)
 add_subdirectory(Models)
 
 target_link_libraries(CovidSim PUBLIC geometrylib)
+
+# OpenMP linking
 if(USE_OPENMP)
-  target_link_libraries(CovidSim PUBLIC OpenMP::OpenMP_CXX)
+  if (FAASM_COVID)
+    target_link_libraries(CovidSim PUBLIC faasmp)
+  else()
+    target_link_libraries(CovidSim PUBLIC OpenMP::OpenMP_CXX)
+  endif()
 endif()
+
+# OS-specific options
 if(WIN32)
   target_link_libraries(CovidSim PUBLIC Gdiplus.lib Vfw32.lib)
   target_compile_definitions(CovidSim PUBLIC  "_CRT_SECURE_NO_WARNINGS")
@@ -30,6 +38,8 @@ elseif(UNIX)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     target_compile_options(CovidSim PUBLIC "SHELL:-fp-model precise")
   endif()
+elseif(FAASM_COVID)
+  target_compile_definitions(CovidSim PUBLIC UNIX)
 else()
   message(FATAL_ERROR "Unknown operating system type: ${CMAKE_SYSTEM_NAME}")
 endif()

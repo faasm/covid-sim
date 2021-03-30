@@ -6,6 +6,8 @@ cmake_minimum_required (VERSION 3.11)
 # Project initialisation
 project("CovidSim")
 
+option(FAASM_COVID "Build for Faasm" OFF)
+
 # Work around some policy behaviours
 if(POLICY CMP0076)
   cmake_policy(SET CMP0076 NEW)
@@ -32,16 +34,26 @@ if(USE_OPENMP)
     set(OpenMP_CXX_FLAGS "-Xclang -fopenmp")
     set(OpenMP_C_FLAGS "-Xclang -fopenmp")
   endif()
-   find_package(OpenMP REQUIRED)
+
+  if(FAASM_COVID)
+    set(OpenMP_C_FLAGS "-fopenmp")
+    set(OpenMP_C_LIB_NAMES "faasm")
+  else()
+    find_package(OpenMP REQUIRED)
+  endif()
 endif()
 
 # Python3 needed for testing
+if(FAASM_COVID)
+  # No Python required for Faasm
+else()
 if (CMAKE_VERSION VERSION_LESS 3.12)
   set(Python_ADDITIONAL_VERSIONS 3 3.9 3.8 3.7 3.6)
   find_package(PythonInterp REQUIRED)
   set(Python3_EXECUTABLE "${PYTHON_EXECUTABLE}")
 else()
   find_package(Python3 REQUIRED)
+endif()
 endif()
 
 # Specify the C++ standard
@@ -52,13 +64,20 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_subdirectory(include)
 add_subdirectory(src)
 
+if(FAASM_COVID)
+  # No testing in Faasm
+else()
 enable_testing()
 add_subdirectory(unit_tests)
 add_subdirectory(tests)
+endif()
 
 # First we can indicate the documentation build as an option and set it to OFF by default
 option(BUILD_DOC "Build documentation" OFF)
 
+if(FAASM_COVID)
+  # No docs in Faasm
+else()
 # Check if Doxygen is installed
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -91,3 +110,4 @@ if(DOXYGEN_FOUND)
 elseif(DOXYGEN_FOUND)
   message("Doxygen needs to be installed to generate the doxygen documentation")
 endif(DOXYGEN_FOUND)
+endif()
