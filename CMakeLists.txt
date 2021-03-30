@@ -37,7 +37,7 @@ if(USE_OPENMP)
 
   if(FAASM_COVID)
     set(OpenMP_C_FLAGS "-fopenmp")
-    set(OpenMP_C_LIB_NAMES "faasm")
+    set(OpenMP_C_LIB_NAMES "faasmp")
   else()
     find_package(OpenMP REQUIRED)
   endif()

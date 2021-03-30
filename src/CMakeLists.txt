@@ -23,6 +23,9 @@ target_link_libraries(CovidSim PUBLIC geometrylib)
 if(USE_OPENMP)
   if (FAASM_COVID)
     target_link_libraries(CovidSim PUBLIC faasmp)
+  
+    # Note - this would normally be achieved by linking with a "real" OpenMP lib
+    target_compile_definitions(CovidSim PUBLIC _OPENMP)
   else()
     target_link_libraries(CovidSim PUBLIC OpenMP::OpenMP_CXX)
   endif()
@@ -40,6 +43,14 @@ elseif(UNIX)
   endif()
 elseif(FAASM_COVID)
   target_compile_definitions(CovidSim PUBLIC UNIX)
+
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+     -Xlinker --export=__heap_base \
+     -Xlinker --export=__data_end \
+     -Xlinker --export=__wasm_call_ctors \
+     -Xlinker --max-memory=4294901760 \
+     -Wl,-z,stack-size=4194304 -Wl, \
+  ")
 else()
   message(FATAL_ERROR "Unknown operating system type: ${CMAKE_SYSTEM_NAME}")
 endif()
