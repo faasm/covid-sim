@@ -36,8 +36,12 @@ if(USE_OPENMP)
   endif()
 
   if(FAASM_COVID)
-    set(OpenMP_C_FLAGS "-fopenmp")
     set(OpenMP_C_LIB_NAMES "faasmp")
+
+    # Note - this is overkill, setting flags at a global level, but it's the
+    # only way it seems to work.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
   else()
     find_package(OpenMP REQUIRED)
   endif()

@@ -23,9 +23,6 @@ target_link_libraries(CovidSim PUBLIC geometrylib)
 if(USE_OPENMP)
   if (FAASM_COVID)
     target_link_libraries(CovidSim PUBLIC faasmp)
-  
-    # Note - this would normally be achieved by linking with a "real" OpenMP lib
-    target_compile_definitions(CovidSim PUBLIC _OPENMP)
   else()
     target_link_libraries(CovidSim PUBLIC OpenMP::OpenMP_CXX)
   endif()
