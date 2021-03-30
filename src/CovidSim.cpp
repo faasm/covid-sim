@@ -386,7 +386,9 @@ int main(int argc, char* argv[])
 					ContCalib = RunModel(Realisation, snapshot_save_file, snapshot_load_file, output_file_base);
 				}
 				while (ContCalib);
+
 				if (!data_file.empty()) CalcLikelihood(Realisation, data_file, output_file_base);
+                
 				if (P.OutputNonSummaryResults)
 				{
 					if (((!TimeSeries[P.NumOutputTimeSteps - 1].extinct) || (!P.OutputOnlyNonExtinct)) && (P.OutputEveryRealisation))
@@ -394,13 +396,16 @@ int main(int argc, char* argv[])
 						SaveResults(output_file);
 					}
 				}
+                
 				if ((P.DoRecordInfEvents) && (P.RecordInfEventsPerRun == 1))
 				{
 					SaveEvents(output_file);
 				}
 			}
-			output_file = output_file_base + ".avNE";
-			SaveSummaryResults(output_file);
+
+            // TODO - causes error in Faasm
+			// output_file = output_file_base + ".avNE";
+			// SaveSummaryResults(output_file);
 
 			//Calculate origin destination matrix if needed
 			if ((P.DoAdUnits) && (P.DoOriginDestinationMatrix))
@@ -416,13 +421,15 @@ int main(int argc, char* argv[])
 				SaveEvents(output_file);
 			}
 
-			SaveSummaryResults(output_file);
+            // TODO - causes error in Faasm
+			// SaveSummaryResults(output_file);
 			P.NRactual = P.NRactE;
 			//TSMean = TSMeanE; TSVar = TSVarE;
 			//Files::xsprintf(OutFile, "%s.avE", OutFileBase);
 			//SaveSummaryResults();
 
-			Bitmap_Finalise();
+            // TODO - causes error in Faasm
+			// Bitmap_Finalise();
 
 			Files::xfprintf_stderr("Extinction in %i out of %i runs\n", P.NRactE, P.NRactNE + P.NRactE);
 #ifdef _OPENMP
@@ -3182,12 +3189,14 @@ int RunModel(int run, std::string const& snapshot_save_file, std::string const& 
 	}
 	if (!InterruptRun) RecordSample(CurrSimTime, P.NumOutputTimeSteps - 1, output_file_base);
 	Files::xfprintf_stderr("\nEnd of run\n");
+
 	t2 = CurrSimTime + P.SimulationDuration;
 	while (KeepRunning)
 	{
 		KeepRunning = TreatSweep(t2);
 		t2 += P.OutputTimeStep;
 	}
+
 	//	Files::xfprintf_stderr(,"End RunModel\n");
 	if (P.DoAirports)
 	{
@@ -3197,6 +3206,7 @@ int RunModel(int run, std::string const& snapshot_save_file, std::string const& 
 	}
 
 	if(!InterruptRun) RecordInfTypes();
+
 	return (InterruptRun);
 }
 
