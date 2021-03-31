@@ -20,12 +20,12 @@ int **SamplingQueue = nullptr;
 /////////////////////// NEIL rand_lib code (with some Gemma rand lib also)
 ///////////// ********* ///////////// ********* ///////////// ********* ///////////// ********* ///////////// ********* ///////////// *********
 
-double ranf(void)
+FLOAT ranf(void)
 {
 	return ranf_mt(OMP_GET_THREAD_NUM);
 }
 
-double ranf_mt(int tn)
+FLOAT ranf_mt(int tn)
 {
 	int32_t k, s1, s2, z;
 	int curntg;
@@ -43,7 +43,7 @@ double ranf_mt(int tn)
 	Xcg2[curntg] = s2;
 	z = s1 - s2;
 	if (z < 1) z += (Xm1 - 1);
-	return ((double)z) / Xm1;
+	return ((FLOAT)z) / Xm1;
 }
 
 void setall(int32_t *pseed1, int32_t *pseed2)
@@ -157,20 +157,20 @@ int32_t mltmod(int32_t a, int32_t s, int32_t m)
 	return p;
 }
 
-int32_t ignbin(int32_t n, double pp)
+int32_t ignbin(int32_t n, FLOAT pp)
 {
 	return ignbin_mt(n, pp, OMP_GET_THREAD_NUM);
 }
 
-int32_t ignpoi(double mu)
+int32_t ignpoi(FLOAT mu)
 {
 	return ignpoi_mt(mu, OMP_GET_THREAD_NUM);
 }
 
-int32_t ignpoi_mt(double mu, int tn)
+int32_t ignpoi_mt(FLOAT mu, int tn)
 /*
 **********************************************************************
-int32_t ignpoi_mt(double mu)
+int32_t ignpoi_mt(FLOAT mu)
 GENerate POIsson random deviate
 Function
 Generates a single random deviate from a Poisson
@@ -219,22 +219,22 @@ COEFFICIENTS A(K) - FOR PX = FK*V*V*SUM(A(K)*V**K)-DEL
 SEPARATION OF CASES A AND B
 */
 {
-	extern double fsign(double num, double sign);
-	double a0 = -0.5;
-	double a1 = 0.3333333;
-	double a2 = -0.2500068;
-	double a3 = 0.2000118;
-	double a4 = -0.1661269;
-	double a5 = 0.1421878;
-	double a6 = -0.1384794;
-	double a7 = 0.125006;
+	extern FLOAT fsign(FLOAT num, FLOAT sign);
+	FLOAT a0 = -0.5;
+	FLOAT a1 = 0.3333333;
+	FLOAT a2 = -0.2500068;
+	FLOAT a3 = 0.2000118;
+	FLOAT a4 = -0.1661269;
+	FLOAT a5 = 0.1421878;
+	FLOAT a6 = -0.1384794;
+	FLOAT a7 = 0.125006;
 	/* JJV changed the initial values of MUPREV and MUOLD */
-	double fact[10] = {
+	FLOAT fact[10] = {
 		1.0,1.0,2.0,6.0,24.0,120.0,720.0,5040.0,40320.0,362880.0
 	};
 	/* JJV added ll to the list, for Case A */
 	int32_t ignpoi_mt, j, k, kflag, l, ll, m;
-	double b1, b2, c, c0, c1, c2, c3, d, del, difmuk, e, fk, fx, fy, g, omega, p, p0, px, py, q, s, t, u, v, x, xx, pp[35];
+	FLOAT b1, b2, c, c0, c1, c2, c3, d, del, difmuk, e, fk, fx, fy, g, omega, p, p0, px, py, q, s, t, u, v, x, xx, pp[35];
 
 	if (mu < 10.0) goto S120;
 	/*
@@ -263,7 +263,7 @@ SEPARATION OF CASES A AND B
 	/*
 	STEP S. SQUEEZE ACCEPTANCE - SUNIF(IR) FOR (0,1)-SAMPLE U
 	*/
-	fk = (double)ignpoi_mt;
+	fk = (FLOAT)ignpoi_mt;
 	difmuk = mu - fk;
 	u = ranf_mt(tn);
 	if (d * u >= difmuk * difmuk * difmuk) return ignpoi_mt;
@@ -308,7 +308,7 @@ S50:
 	t = 1.8 + fsign(e, u);
 	if (t <= -0.6744) goto S50;
 	ignpoi_mt = (int32_t)(mu + s * t);
-	fk = (double)ignpoi_mt;
+	fk = (FLOAT)ignpoi_mt;
 	difmuk = mu - fk;
 	/*
 	'SUBROUTINE' F IS CALLED (KFLAG=1 FOR CORRECT RETURN)
@@ -328,7 +328,7 @@ S70:
 	*/
 	if (ignpoi_mt >= 10) goto S80;
 	px = -mu;
-	py = pow(mu, (double)ignpoi_mt) / *(fact + ignpoi_mt);
+	py = pow(mu, (FLOAT)ignpoi_mt) / *(fact + ignpoi_mt);
 	goto S110;
 S80:
 	/*
@@ -388,7 +388,7 @@ S150:
 	*/
 	l += 1;
 	for (k = l; k <= 35; k++) {
-		p = p * mu / (double)k;
+		p = p * mu / (FLOAT)k;
 		q += p;
 		*(pp + k - 1) = q;
 		if (u <= q) goto S170;
@@ -401,11 +401,11 @@ S180:
 	ignpoi_mt = k;
 	return ignpoi_mt;
 }
-int32_t ignbin_mt(int32_t n, double pp, int tn)
+int32_t ignbin_mt(int32_t n, FLOAT pp, int tn)
 {
 	/*
 **********************************************************************
-int32_t ignbin_mt(int32_t n,double pp)
+int32_t ignbin_mt(int32_t n,FLOAT pp)
 GENerate BINomial random deviate
 Function
 Generates a single random deviate from a binomial
@@ -503,14 +503,14 @@ IX AND JX COULD LOGICALLY BE THE SAME VARIABLE, WHICH WOULD
 SAVE A MEMORY POSITION AND A LINE OF CODE.  HOWEVER, SOME
 COMPILERS (E.G.,CDC MNF) OPTIMIZE BETTER WHEN THE ARGUMENTS
 ARE NOT INVOLVED.
-ISEED NEEDS TO BE DOUBLE PRECISION IF THE IMSL ROUTINE
+ISEED NEEDS TO BE FLOAT PRECISION IF THE IMSL ROUTINE
 GGUBFS IS USED TO GENERATE UNIFORM RANDOM NUMBER, OTHERWISE
 TYPE OF ISEED SHOULD BE DICTATED BY THE UNIFORM GENERATOR
 **********************************************************************
 *****DETERMINE APPROPRIATE ALGORITHM AND WHETHER SETUP IS NECESSARY
 */
 	int32_t ignbin_mt, i, ix, ix1, k, m, mp, T1;
-	double al, alv, amaxp, c, f, f1, f2, ffm, fm, g, p, p1, p2, p3, p4, q, qn, r, u, v, w, w2, x, x1,
+	FLOAT al, alv, amaxp, c, f, f1, f2, ffm, fm, g, p, p1, p2, p3, p4, q, qn, r, u, v, w, w2, x, x1,
 		x2, xl, xll, xlr, xm, xnp, xnpq, xr, ynorm, z, z2;
 
 	/*
@@ -519,8 +519,8 @@ TYPE OF ISEED SHOULD BE DICTATED BY THE UNIFORM GENERATOR
 	*/
 	if (pp < 0.0) ERR_CRITICAL("PP < 0.0 in IGNBIN");
 	if (pp > 1.0) ERR_CRITICAL("PP > 1.0 in IGNBIN");
-	double psave = pp;
-	p = std::min(psave, 1.0 - psave);
+	FLOAT psave = pp;
+	p = std::min<FLOAT>(psave, 1.0 - psave);
 	q = 1.0 - p;
 
 	/*
@@ -641,7 +641,7 @@ S140:
 	/*
 	INVERSE CDF LOGIC FOR MEAN LESS THAN 30
 	*/
-	qn = pow(q, (double)n);
+	qn = pow(q, (FLOAT)n);
 	r = p / q;
 	g = r * (n + 1);
 S150:
@@ -661,12 +661,12 @@ S170:
 	return ignbin_mt;
 }
 
-double sexpo(void)
+FLOAT sexpo(void)
 {
 	return sexpo_mt(OMP_GET_THREAD_NUM);
 }
 
-double sexpo_mt(int tn)
+FLOAT sexpo_mt(int tn)
 /*
 **********************************************************************
 
@@ -697,9 +697,9 @@ Q(N) = SUM(ALOG(2.0)**K/K!)    K=1,..,N ,      THE HIGHEST N
 {
 //	return -log(1 - ranf_mt(tn));  // a much simpler exponential generator!
 
-	double q[8] = {0.6931472,0.9333737,0.9888778,0.9984959,0.9998293,0.9999833,0.9999986,0.99999999999999989};
+	FLOAT q[8] = {0.6931472,0.9333737,0.9888778,0.9984959,0.9998293,0.9999833,0.9999986,0.99999999999999989};
 	int32_t i;
-	double sexpo_mt, a, u, ustar, umin;
+	FLOAT sexpo_mt, a, u, ustar, umin;
 
 	a = 0.0;
 	u = ranf_mt(tn);
@@ -727,7 +727,7 @@ S70:
 
 }
 
-double snorm(void)
+FLOAT snorm(void)
 /*
 **********************************************************************
 
@@ -756,27 +756,27 @@ double snorm(void)
 	 H(K) ARE ACCORDING TO THE ABOVEMENTIONED ARTICLE
 */
 {
-	static double a[32] = {
+	static FLOAT a[32] = {
 		0.0,3.917609E-2,7.841241E-2,0.11777,0.1573107,0.1970991,0.2372021,0.2776904,
 		0.3186394,0.36013,0.4022501,0.4450965,0.4887764,0.5334097,0.5791322,
 		0.626099,0.6744898,0.7245144,0.7764218,0.8305109,0.8871466,0.9467818,
 		1.00999,1.077516,1.150349,1.229859,1.318011,1.417797,1.534121,1.67594,
 		1.862732,2.153875
 	};
-	static double d[31] = {
+	static FLOAT d[31] = {
 		0.0,0.0,0.0,0.0,0.0,0.2636843,0.2425085,0.2255674,0.2116342,0.1999243,
 		0.1899108,0.1812252,0.1736014,0.1668419,0.1607967,0.1553497,0.1504094,
 		0.1459026,0.14177,0.1379632,0.1344418,0.1311722,0.128126,0.1252791,
 		0.1226109,0.1201036,0.1177417,0.1155119,0.1134023,0.1114027,0.1095039
 	};
-	static double t[31] = {
+	static FLOAT t[31] = {
 		7.673828E-4,2.30687E-3,3.860618E-3,5.438454E-3,7.0507E-3,8.708396E-3,
 		1.042357E-2,1.220953E-2,1.408125E-2,1.605579E-2,1.81529E-2,2.039573E-2,
 		2.281177E-2,2.543407E-2,2.830296E-2,3.146822E-2,3.499233E-2,3.895483E-2,
 		4.345878E-2,4.864035E-2,5.468334E-2,6.184222E-2,7.047983E-2,8.113195E-2,
 		9.462444E-2,0.1123001,0.136498,0.1716886,0.2276241,0.330498,0.5847031
 	};
-	static double h[31] = {
+	static FLOAT h[31] = {
 		3.920617E-2,3.932705E-2,3.951E-2,3.975703E-2,4.007093E-2,4.045533E-2,
 		4.091481E-2,4.145507E-2,4.208311E-2,4.280748E-2,4.363863E-2,4.458932E-2,
 		4.567523E-2,4.691571E-2,4.833487E-2,4.996298E-2,5.183859E-2,5.401138E-2,
@@ -784,7 +784,7 @@ double snorm(void)
 		8.781922E-2,9.930398E-2,0.11556,0.1404344,0.1836142,0.2790016,0.7010474
 	};
 	int32_t i; //made this non-static: ggilani 27/11/14
-	double snorm, u, s, ustar, aa, w, y, tt; //made this non-static: ggilani 27/11/14
+	FLOAT snorm, u, s, ustar, aa, w, y, tt; //made this non-static: ggilani 27/11/14
 	u = ranf();
 	s = 0.0;
 	if (u > 0.5) s = 1.0;
@@ -796,7 +796,7 @@ double snorm(void)
 	/*
 									START CENTER
 	*/
-	ustar = u - (double)i;
+	ustar = u - (FLOAT)i;
 	aa = *(a + i - 1);
 S40:
 	if (ustar <= *(t + i - 1)) goto S60;
@@ -854,7 +854,7 @@ S160:
 	u = ranf();
 	goto S140;
 }
-double snorm_mt(int tn)
+FLOAT snorm_mt(int tn)
 /*
 **********************************************************************
 
@@ -883,27 +883,27 @@ THE DEFINITIONS OF THE CONSTANTS A(K), D(K), T(K) AND
 H(K) ARE ACCORDING TO THE ABOVEMENTIONED ARTICLE
 */
 {
-	static double a[32] = {
+	static FLOAT a[32] = {
 		0.0,3.917609E-2,7.841241E-2,0.11777,0.1573107,0.1970991,0.2372021,0.2776904,
 			0.3186394,0.36013,0.4022501,0.4450965,0.4887764,0.5334097,0.5791322,
 			0.626099,0.6744898,0.7245144,0.7764218,0.8305109,0.8871466,0.9467818,
 			1.00999,1.077516,1.150349,1.229859,1.318011,1.417797,1.534121,1.67594,
 			1.862732,2.153875
 	};
-	static double d[31] = {
+	static FLOAT d[31] = {
 		0.0,0.0,0.0,0.0,0.0,0.2636843,0.2425085,0.2255674,0.2116342,0.1999243,
 			0.1899108,0.1812252,0.1736014,0.1668419,0.1607967,0.1553497,0.1504094,
 			0.1459026,0.14177,0.1379632,0.1344418,0.1311722,0.128126,0.1252791,
 			0.1226109,0.1201036,0.1177417,0.1155119,0.1134023,0.1114027,0.1095039
 	};
-	static double t[31] = {
+	static FLOAT t[31] = {
 		7.673828E-4,2.30687E-3,3.860618E-3,5.438454E-3,7.0507E-3,8.708396E-3,
 			1.042357E-2,1.220953E-2,1.408125E-2,1.605579E-2,1.81529E-2,2.039573E-2,
 			2.281177E-2,2.543407E-2,2.830296E-2,3.146822E-2,3.499233E-2,3.895483E-2,
 			4.345878E-2,4.864035E-2,5.468334E-2,6.184222E-2,7.047983E-2,8.113195E-2,
 			9.462444E-2,0.1123001,0.136498,0.1716886,0.2276241,0.330498,0.5847031
 	};
-	static double h[31] = {
+	static FLOAT h[31] = {
 		3.920617E-2,3.932705E-2,3.951E-2,3.975703E-2,4.007093E-2,4.045533E-2,
 			4.091481E-2,4.145507E-2,4.208311E-2,4.280748E-2,4.363863E-2,4.458932E-2,
 			4.567523E-2,4.691571E-2,4.833487E-2,4.996298E-2,5.183859E-2,5.401138E-2,
@@ -911,7 +911,7 @@ H(K) ARE ACCORDING TO THE ABOVEMENTIONED ARTICLE
 			8.781922E-2,9.930398E-2,0.11556,0.1404344,0.1836142,0.2790016,0.7010474
 	};
 	int32_t i;
-	double snorm_mt, u, s, ustar, aa, w, y, tt;
+	FLOAT snorm_mt, u, s, ustar, aa, w, y, tt;
 	u = ranf_mt(tn);
 	s = 0.0;
 	if (u > 0.5) s = 1.0;
@@ -923,7 +923,7 @@ H(K) ARE ACCORDING TO THE ABOVEMENTIONED ARTICLE
 	/*
 	START CENTER
 	*/
-	ustar = u - (double)i;
+	ustar = u - (FLOAT)i;
 	aa = *(a + i - 1);
 S40:
 	if (ustar <= *(t + i - 1)) goto S60;
@@ -981,7 +981,7 @@ S160:
 	u = ranf_mt(tn);
 	goto S140;
 }
-double fsign(double num, double sign)
+FLOAT fsign(FLOAT num, FLOAT sign)
 /* Transfers sign of argument sign to argument num */
 {
 	if ((sign > 0.0f && num < 0.0f) || (sign < 0.0f && num>0.0f))
@@ -993,9 +993,9 @@ double fsign(double num, double sign)
  *
  * author: ggilani, date: 28/11/14
  */
-double gen_norm_mt(double mu, double sd, int tn)
+FLOAT gen_norm_mt(FLOAT mu, FLOAT sd, int tn)
 {
-	double u, v, x, S;
+	FLOAT u, v, x, S;
 
 	do
 	{
@@ -1022,9 +1022,9 @@ double gen_norm_mt(double mu, double sd, int tn)
  *
  * author: ggilani, date: 01/12/14
  */
-double gen_gamma_mt(double beta, double alpha, int tn)
+FLOAT gen_gamma_mt(FLOAT beta, FLOAT alpha, int tn)
 {
-	double d, c, u, v, z, f, alpha2, gamma;
+	FLOAT d, c, u, v, z, f, alpha2, gamma;
 
 	//error statment if either beta or alpha are <=0, as gamma distribution is undefined in this case
 	if ((beta <= 0) || (alpha <= 0))
@@ -1084,21 +1084,21 @@ double gen_gamma_mt(double beta, double alpha, int tn)
 		return gamma * f;
 	}
 }
-/* function gen_lognormal(double mu, double sigma)
+/* function gen_lognormal(FLOAT mu, FLOAT sigma)
  * purpose: to generate samples from a lognormal distribution with parameters mu and sigma
  *
  * parameters:
  *  mean mu
  *  standard deviation sigma
  *
- * returns: double from the specified lognormal distribution
+ * returns: FLOAT from the specified lognormal distribution
  *
  * author: ggilani, date: 09/02/17
  */
-double gen_lognormal(double mu, double sigma)
+FLOAT gen_lognormal(FLOAT mu, FLOAT sigma)
 {
-	double randnorm, location, scale;
-	double s = 1 + ((sigma * sigma) / (mu * mu));
+	FLOAT randnorm, location, scale;
+	FLOAT s = 1 + ((sigma * sigma) / (mu * mu));
 
 	randnorm = snorm();
 	location = log(mu / sqrt(s));
@@ -1116,7 +1116,7 @@ void SampleWithoutReplacement(int tn, int k, int n)
 	ISSN:0098-3500
 	*/
 
-	double t, r, a, mu, f;
+	FLOAT t, r, a, mu, f;
 	int i, j, q, b;
 
 	if (k < 3)
@@ -1125,7 +1125,7 @@ void SampleWithoutReplacement(int tn, int k, int n)
 		{
 			do
 			{
-				SamplingQueue[tn][i] = (int)(ranf_mt(tn) * ((double)n));
+				SamplingQueue[tn][i] = (int)(ranf_mt(tn) * ((FLOAT)n));
 // This original formulation is completely valid, but the PVS Studio analyzer
 // notes this, so I am changing it just to get report-clean.
 // "V1008 Consider inspecting the 'for' operator. No more than one iteration of the loop will be performed. Rand.cpp 2450"
@@ -1144,7 +1144,7 @@ void SampleWithoutReplacement(int tn, int k, int n)
 			SamplingQueue[tn][i] = i;
 		for (i = n; i > k; i--)
 		{
-			j = (int)(ranf_mt(tn) * ((double)i));
+			j = (int)(ranf_mt(tn) * ((FLOAT)i));
 			if (j != i - 1)
 			{
 				b = SamplingQueue[tn][j];
@@ -1160,7 +1160,7 @@ void SampleWithoutReplacement(int tn, int k, int n)
 			SamplingQueue[tn][i] = i;
 		for (i = 0; i < k; i++)
 		{
-			j = (int)(ranf_mt(tn) * ((double)(n - i)));
+			j = (int)(ranf_mt(tn) * ((FLOAT)(n - i)));
 			if (j > 0)
 			{
 				b = SamplingQueue[tn][i];
@@ -1173,13 +1173,13 @@ void SampleWithoutReplacement(int tn, int k, int n)
 	else
 	{
 		/* Files::xfprintf_stderr("@%i %i:",k,n); */
-		t = (double)k;
+		t = (FLOAT)k;
 		r = sqrt(t);
 		a = sqrt(log(1 + t / 2 * PI));
 		a = a + a * a / (3 * r);
 		mu = t + a * r;
 		b = 2 * MAX_PLACE_SIZE; /* (int) (k+4*a*r); */
-		f = -1 / (log(1 - mu / ((double)n)));
+		f = -1 / (log(1 - mu / ((FLOAT)n)));
 		i = q = 0;
 		while (i <= n)
 		{
@@ -1196,13 +1196,13 @@ void SampleWithoutReplacement(int tn, int k, int n)
 	}
 	/*	else
 			{
-			t=(double) (n-k);
+			t=(FLOAT) (n-k);
 			r=sqrt(t);
 			a=sqrt(log(1+t/2*PI));
 			a=a+a*a/(3*r);
 			mu=t+a*r;
 			b=2*MAX_PLACE_SIZE;
-			f=-1/(log(1-mu/((double) n)));
+			f=-1/(log(1-mu/((FLOAT) n)));
 			i=q=0;
 			while(i<=n)
 				{
@@ -1235,7 +1235,7 @@ void SampleWithoutReplacement(int tn, int k, int n)
 			}
 	*/	while (q > k)
 	{
-		i = (int)(ranf_mt(tn) * ((double)q));
+		i = (int)(ranf_mt(tn) * ((FLOAT)q));
 		if (i < q - 1) SamplingQueue[tn][i] = SamplingQueue[tn][q - 1];
 		q--;
 	}
