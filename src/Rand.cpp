@@ -5,7 +5,9 @@
 #include "Error.h"
 #include "Files.h"
 
-#ifdef _OPENMP
+#if defined(__faasm)
+#define OMP_GET_THREAD_NUM 0
+#elif defined(_OPENMP)
 #include <omp.h>
 #define OMP_GET_THREAD_NUM omp_get_thread_num()
 #else
