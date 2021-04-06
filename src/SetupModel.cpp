@@ -1350,7 +1350,6 @@ void SetupPopulation(std::string const& density_file, std::string const& out_den
 		}
 
 		// make age adjustments to population
-	printf("DEBUG - LOOP 2\n");
 #pragma omp parallel for private(j,m,s) schedule(static,1) default(none) \
 			shared(P, Hosts, AgeDistCorrF, AgeDistCorrB, Mcells, reg_demog_file)
 		for (int tn = 0; tn < P.NumThreads; tn++)
@@ -1517,7 +1516,7 @@ void SetupPopulation(std::string const& density_file, std::string const& out_den
 	if (P.DoPlaces)
 	{
 		Files::xfprintf_stderr("Configuring places...\n");
-
+        
 #pragma omp parallel for private(j2,j,t,m,s,x,y,xh,yh) schedule(static,1) default(none) \
 			shared(P, Hosts, Places, PropPlaces, Mcells, maxd, last_i, mcell_country, stderr_shared)
 		for (int tn = 0; tn < P.NumThreads; tn++)
@@ -1528,8 +1527,11 @@ void SetupPopulation(std::string const& density_file, std::string const& out_den
 				for (int i = 0; i < P.PopSize; i++)
 					t += PropPlaces[HOST_AGE_YEAR(i)][j2];
 				P.Nplace[j2] = (int)ceil(t / P.PlaceTypeMeanSize[j2]);
-				Files::xfprintf(stderr_shared, "[%i:%i %g] ", j2, P.Nplace[j2], t);
-				Places[j2] = (Place*)Memory::xcalloc(P.Nplace[j2], sizeof(Place));
+				
+                // TODO - causes error in Faasm but seems to be debugging
+                // Files::xfprintf(stderr_shared, "[%i:%i %g] ", j2, P.Nplace[j2], t);
+				
+                Places[j2] = (Place*)Memory::xcalloc(P.Nplace[j2], sizeof(Place));
 				t = 1.0;
 				int k;
 				for (int i = m = k = 0; i < P.NumMicrocells; i++)
