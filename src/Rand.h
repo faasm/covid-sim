@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-typedef float FLOAT;
+typedef double FLOAT;
 
 /* ranf defines */
 const int32_t Xm1 = 2147483563;

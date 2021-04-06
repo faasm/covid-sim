@@ -1256,30 +1256,39 @@ void SetupPopulation(std::string const& density_file, std::string const& out_den
 			x = (double)(j / P.total_microcells_high_);
 			y = (double)(j % P.total_microcells_high_);
 			int i = Mcells[j].members[0];
+	        
 			if (j % 100 == 0)
 				Files::xfprintf(stderr_shared, "%i=%i (%i %i)            \r", j, Mcells[j].n, Mcells[j].adunit, (AdUnits[Mcells[j].adunit].id % P.AdunitLevel1Mask) / P.AdunitLevel1Divisor);
+
 			for (int k = 0; k < Mcells[j].n;)
 			{
 				m = Hosts[i].listpos;
 				xh = P.in_microcells_.width * (ranf_mt(tn) + x);
 				yh = P.in_microcells_.height * (ranf_mt(tn) + y);
+                
 				AssignHouseholdAges(m, i, tn, !reg_demog_file.empty());
+
 				for (i2 = 0; i2 < m; i2++) Hosts[i + i2].listpos = 0;
+
 				if (P.DoHouseholds)
 				{
 					for (i2 = 0; i2 < m; i2++) {
 						Hosts[i + i2].set_susceptible(); //added this so that infection status is set to zero and household r0 is correctly calculated
 					}
 				}
+
 				Households[Hosts[i].hh].FirstPerson = i;
 				Households[Hosts[i].hh].nh = m;
 				Households[Hosts[i].hh].nhr = m;
 				Households[Hosts[i].hh].loc.x = (float)xh;
 				Households[Hosts[i].hh].loc.y = (float)yh;
+
 				i += m;
 				k += m;
 			}
+            
 		}
+
 	if (P.DoCorrectAgeDist)
 	{
 		double** AgeDistAd, ** AgeDistCorrF, ** AgeDistCorrB;
@@ -1341,6 +1350,7 @@ void SetupPopulation(std::string const& density_file, std::string const& out_den
 		}
 
 		// make age adjustments to population
+	printf("DEBUG - LOOP 2\n");
 #pragma omp parallel for private(j,m,s) schedule(static,1) default(none) \
 			shared(P, Hosts, AgeDistCorrF, AgeDistCorrB, Mcells, reg_demog_file)
 		for (int tn = 0; tn < P.NumThreads; tn++)
@@ -1818,7 +1828,13 @@ void AssignHouseholdAges(int n, int pers, int tn, bool do_adunit_demog)
 	int a[MAX_HOUSEHOLD_SIZE + 2];
 
 	ad = (do_adunit_demog && (P.DoAdUnits)) ? Mcells[Hosts[pers].mcell].adunit : 0;
-	if (!P.DoHouseholds)
+
+    // TODO - when P.DoHouseholds is false, this calculation occasionally hangs
+    // in Faasm, so we have to disable it for now
+    // int doHouseholds = P.DoHouseholds;
+    int doHouseholds = 1;
+
+	if (doHouseholds)
 	{
 		for (i = 0; i < n; i++)
 			a[i] = State.InvAgeDist[ad][(int)(1000.0 * ranf_mt(tn))];
