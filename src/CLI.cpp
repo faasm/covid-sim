@@ -30,8 +30,11 @@ void parse_write_dir(std::string const& input, std::string& output)
 	// check to see if this prefix already exists as a file and error out
 	if (static_cast<bool>(std::ifstream(input)) == true)
 	{
-		ERR_CRITICAL_FMT("Cannot use this prefix, this path already exists"
-						 " as a file: %s\n", input.c_str());
+        // Nuke the file if it exists
+        remove(input.c_str());
+       
+		// ERR_CRITICAL_FMT("Cannot use this prefix, this path already exists"
+		//				 " as a file: %s\n", input.c_str());
 	}
 	// TODO: add a platform-independent check to see if the prefix could
 	// be added as a directory or file
